@@ -28,21 +28,32 @@ SDL_Surface* convolution(SDL_Surface *img, float* matrix[], int s)
   {
     for (int j = 0; j < new->w; ++j)
     {
-      int res = 0;
+      int r = 0;
+      int g = 0;
+      int b = 0;
+
       struct color c;
       for (int k = -s / 2; k <= s / 2; ++k)
       {
         for (int l = -s / 2; l <= s / 2; ++l)
         {
           struct color p = pix_to_color(get_pixel(img, j + k + (s / 2), i + l + (s / 2)), img->format);
-          res += p.r * matrix[k + s / 2][l + s / 2];
+          r += p.r * matrix[k + s / 2][l + s / 2];
+          g += p.g * matrix[k + s / 2][l + s / 2];
+          b += p.b * matrix[k + s / 2][l + s / 2];
         }
       }
 
-      res = res < 0 ? 0 : res;
-      res = res > 255 ? 255 : res;
+      r = r < 0 ? 0 : r;
+      r = r > 255 ? 255 : r;
+      g = g < 0 ? 0 : g;
+      g = g > 255 ? 255 : g;
+      b = b < 0 ? 0 : b;
+      b = b > 255 ? 255 : b;
 
-      c.r = c.g = c.b = res;
+      c.r = r;
+      c.g = g;
+      c.b = b;
 
       put_pixel(new, j, i, to_int(c));
     }
@@ -66,8 +77,8 @@ float** get_gaussian_filter(float sigma)
   {
     for (int j = -r; j <= r; ++j)
     {
-      /*e = (-1 / (M_PI * sigma * sigma * sigma * sigma)) * 
-           (1 - ((i * i + j * j) / (2 * sigma * sigma))) * 
+      /*e = (-1 / (M_PI * sigma * sigma * sigma * sigma)) *
+           (1 - ((i * i + j * j) / (2 * sigma * sigma))) *
            exp(-((i * i + j * j) / (2 * sigma * sigma)));*/
       e = exp(-((i * i + j * j) / 2 / sigma / sigma)) *
           (i*i+j*j-2*sigma*sigma)/sigma/sigma/sigma/sigma;

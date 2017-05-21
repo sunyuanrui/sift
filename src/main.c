@@ -26,18 +26,18 @@ int main(int argc, char* argv[])
 
   SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
   SDL_Surface* image = IMG_Load(argv[1]);
-  grayscale(image);
+  //grayscale(image);
 
-  float **cov = get_gaussian_filter(2);
+  float **cov = get_gaussian_filter(1);
 
-  for (int i = 0; i < 2 * 2 * 2 + 1; ++i)
+  for (int i = 0; i < 1 * 2 * 2 + 1; ++i)
   {
-    for (int j = 0; j < 2 * 2 * 2 + 1; ++j)
+    for (int j = 0; j < 1 * 2 * 2 + 1; ++j)
       printf("%f ", cov[i][j]);
     printf("\n");
   }
 
-  image = convolution(image, cov, 2 * 2 * 2 + 1);
+  image = convolution(image, cov, 1 * 2 * 2 + 1);
 
   printf("Convolution: OK\n");
 
