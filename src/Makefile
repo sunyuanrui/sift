@@ -3,13 +3,13 @@ TARGET = ../tirf
 
 all: $(TARGET)
 
-$(TARGET): main.c pixel.o grayscale.o
+$(TARGET): main.c pixel.o tools.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 pixel.o: pixel.c
 	$(CC) $(CFLAGS) -c $^ $(LDFLAGS)
 
-grayscale.o: grayscale.c
+tools.o: tools.c
 	$(CC) $(CFLAGS) -c $^ $(LDFLAGS)
 
 clean:
