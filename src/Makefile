@@ -1,15 +1,19 @@
 include ../common.mk
 TARGET = ../tirf
+OBJ = pixel.o tools.o sift_features.o
 
 all: $(TARGET)
 
-$(TARGET): main.c pixel.o tools.o
+$(TARGET): main.c $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 pixel.o: pixel.c
 	$(CC) $(CFLAGS) -c $^ $(LDFLAGS)
 
 tools.o: tools.c
+	$(CC) $(CFLAGS) -c $^ $(LDFLAGS)
+
+sift_features.o: sift_features.c
 	$(CC) $(CFLAGS) -c $^ $(LDFLAGS)
 
 clean:

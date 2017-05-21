@@ -6,6 +6,7 @@
 # include <SDL2/SDL2_rotozoom.h>
 
 # include "tools.h"
+# include "sift_features.h"
 
 int main(int argc, char* argv[])
 {
@@ -26,7 +27,6 @@ int main(int argc, char* argv[])
 
   SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
   SDL_Surface* image = IMG_Load(argv[1]);
-  //grayscale(image);
 
   float **cov = get_gaussian_filter(1);
 
@@ -40,6 +40,12 @@ int main(int argc, char* argv[])
   image = convolution(image, cov, 1 * 2 * 2 + 1);
 
   printf("Convolution: OK\n");
+
+  grayscale(image);
+
+  printf("Grayscale: OK\n");
+
+  get_interest(image);
 
   float zoom = (image->w > image->h ? image->w : image->h) / 600.0;
 
