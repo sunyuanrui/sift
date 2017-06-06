@@ -20,36 +20,56 @@ int main(int argc, char* argv[])
   SDL_Event event;
 
   SDL_Init(SDL_INIT_VIDEO);
-  IMG_Init(IMG_INIT_JPG);
+  IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF);
 
-  SDL_Window* window = SDL_CreateWindow("SDL2 Displaying Image",
-      SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 600, 600, 0);
-
-  SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
   SDL_Surface* image = IMG_Load(argv[1]);
 
-  float **cov = get_gaussian_filter(1);
+  if(!image) {
+    printf("IMG_Load: %s\n", IMG_GetError());
+  }
 
-  for (int i = 0; i < 1 * 2 * 2 + 1; ++i)
+  SDL_Window* window = SDL_CreateWindow("SDL2 Displaying Image",
+      SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, image->w, image->h, 0);
+  SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
+
+
+  /*float scale = 1;//1.1 * sqrt(2);
+
+  float **cov = get_gaussian_filter(scale);
+
+  int r = scale * 2;
+  int s = r * 2 + 1;
+
+  for (int i = 0; i < s; ++i)
   {
-    for (int j = 0; j < 1 * 2 * 2 + 1; ++j)
+    for (int j = 0; j < s; ++j)
       printf("%f ", cov[i][j]);
     printf("\n");
   }
 
-  image = convolution(image, cov, 1 * 2 * 2 + 1);
+  image = convolution(image, cov, s);
 
   printf("Convolution: OK\n");
 
-  grayscale(image);
+  grayscale(image);*/
+  gradient_pyramide(image);
+
+  /*FILE* f = fopen("hist.csv", "w");
+
+  int* hist = histogram_1d(image);
+  for (int i = 0; i < 256; ++i)
+    fprintf(f, "%d;", i);
+  fprintf(f, "\n");
+  for (int i = 0; i < 256; ++i)
+    fprintf(f, "%d;", hist[i]);*/
 
   printf("Grayscale: OK\n");
 
-  get_interest(image);
+  //get_interest(image);
 
   float zoom = (image->w > image->h ? image->w : image->h) / 600.0;
-
   image = rotozoomSurface(image, 0.0, zoom, 1);
+
   SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, image);
 
   while (!quit)

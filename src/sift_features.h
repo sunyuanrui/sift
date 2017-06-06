@@ -12,5 +12,6 @@ typedef struct Points {
 } Points;
 
 void get_interest(SDL_Surface* img);
+void gradient_pyramide(SDL_Surface* img);
 
 # endif

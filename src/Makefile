@@ -2,6 +2,10 @@ include ../common.mk
 TARGET = ../tirf
 OBJ = pixel.o tools.o sift_features.o
 
+debug: CFLAGS += -g
+debug: $(TARGET)
+
+all: CFLAGS += -O3
 all: $(TARGET)
 
 $(TARGET): main.c $(OBJ)

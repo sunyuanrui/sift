@@ -68,7 +68,7 @@ float** get_gaussian_filter(float sigma)
 
   float ** out = malloc(s * sizeof(float*));
   for (int i = 0; i < s; ++i)
-    out[i] = calloc(sizeof(float), s);
+    out[i] = calloc(s, sizeof(float));
 
   float kernelFactor = 0.0;
   float e = 0.0;
@@ -97,5 +97,15 @@ float** get_gaussian_filter(float sigma)
     }
   }
 
+  return out;
+}
+
+int* histogram_1d(SDL_Surface* image)
+{
+  int* out = calloc(sizeof(int), 256);
+
+  for (int i = 0; i < image->h; ++i)
+    for (int j = 0; j < image->w; ++j)
+      out[pix_to_color(get_pixel(image, j - 1, i - 1), image->format).r]++;
   return out;
 }
