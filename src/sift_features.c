@@ -141,7 +141,7 @@ struct slisthead get_interest(SDL_Surface* img, double sigma)
         p80 = p80;
         for (int ig = 1; ig < 36; ++ig)
         {
-          /*if (hist[ig] >= p80)
+          if (hist[ig] >= p80)
           {
             Points* p = malloc(sizeof(Points));
             p->x = j;
@@ -149,7 +149,7 @@ struct slisthead get_interest(SDL_Surface* img, double sigma)
             p->g = maxi * 10;
             SLIST_INSERT_HEAD(&head, p, next);
             ++nb_dots;
-          }*/
+          }
         }
         
         draw_circle(img, 10, j, i);
