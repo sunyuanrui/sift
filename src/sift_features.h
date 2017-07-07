@@ -8,10 +8,13 @@ typedef struct Points {
   int x;
   int y;
 
+  double g;
+  double sigma;
+
   SLIST_ENTRY(Points) next;
 } Points;
 
-void get_interest(SDL_Surface* img);
-void gradient_pyramide(SDL_Surface* img);
+SLIST_HEAD(slisthead, Points) get_interest(SDL_Surface* img, double sigma);
+struct slisthead gradient_pyramide(SDL_Surface* img);
 
 # endif

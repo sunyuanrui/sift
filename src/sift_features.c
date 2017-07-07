@@ -19,8 +19,6 @@ void draw_circle(SDL_Surface* img, int r, int j, int i)
   }
 }
 
-
-
 int remove_edges(SDL_Surface* img, int x, int y)
 {
   int x1 = pix_to_color(get_pixel(img, x + 1, y), img->format).r;
@@ -67,12 +65,39 @@ double compute_g(SDL_Surface* img, int x, int y)
   double y1 = pix_to_color(get_pixel(img, x, y + 1), img->format).r;
   double y_1 = pix_to_color(get_pixel(img, x, y - 1), img->format).r;
 
-  return atan((y1 - y_1) / (x1 - x_1));
+  return atan2((y1 - y_1), (x1 - x_1));
 }
 
-void get_interest(SDL_Surface* img)
+/*double* get_hist(SDL_Surface* img, int x, int y, double sigma)
 {
-  SLIST_HEAD(, Points) head;
+  double* out = calloc(36, sizeof(double));
+  return out;  
+}*/
+
+int is_interest(int j, int i, SDL_Surface* img)
+{
+  int me = pix_to_color(get_pixel(img, j, i), img->format).r;
+
+  int p1 = pix_to_color(get_pixel(img, j - 1, i - 1), img->format).r;
+  int p2 = pix_to_color(get_pixel(img, j - 1, i - 0), img->format).r;
+  int p3 = pix_to_color(get_pixel(img, j - 1, i + 1), img->format).r;
+  int p4 = pix_to_color(get_pixel(img, j - 0, i - 1), img->format).r;
+  int p5 = pix_to_color(get_pixel(img, j - 0, i + 1), img->format).r;
+  int p6 = pix_to_color(get_pixel(img, j + 1, i - 1), img->format).r;
+  int p7 = pix_to_color(get_pixel(img, j + 1, i - 0), img->format).r;
+  int p8 = pix_to_color(get_pixel(img, j + 1, i + 1), img->format).r;
+
+  return ((me > p1 && me > p2 && me > p3 && me > p4 && me > p5 && me > p6 && me > p7 && me > p8
+            && remove_edges(img, j, i)) ||
+          (me < p1 && me < p2 && me < p3 && me < p4 && me < p5 && me < p6 && me < p7 && me < p8
+            && remove_edges(img, j, i)));
+
+}
+
+struct slisthead get_interest(SDL_Surface* img, double sigma)
+{
+  sigma = sigma;
+  struct slisthead head;
   SLIST_INIT(&head);
 
   int nb_dots = 0;
@@ -81,53 +106,65 @@ void get_interest(SDL_Surface* img)
   {
     for (int j = 1; j < img->w - 1; ++j)
     {
-      int me = pix_to_color(get_pixel(img, j, i), img->format).r;
-
-      int p1 = pix_to_color(get_pixel(img, j - 1, i - 1), img->format).r;
-      int p2 = pix_to_color(get_pixel(img, j - 1, i - 0), img->format).r;
-      int p3 = pix_to_color(get_pixel(img, j - 1, i + 1), img->format).r;
-      int p4 = pix_to_color(get_pixel(img, j - 0, i - 1), img->format).r;
-      int p5 = pix_to_color(get_pixel(img, j - 0, i + 1), img->format).r;
-      int p6 = pix_to_color(get_pixel(img, j + 1, i - 1), img->format).r;
-      int p7 = pix_to_color(get_pixel(img, j + 1, i - 0), img->format).r;
-      int p8 = pix_to_color(get_pixel(img, j + 1, i + 1), img->format).r;
-
-      if (me > p1 && me > p2 && me > p3 && me > p4 && me > p5 && me > p6 && me > p7 && me > p8
-         && remove_edges(img, j, i))
+      if (is_interest(j, i, img))
       {
-        Points* p = malloc(sizeof(p));
+        double hist[36] = {0};
+
+        for (int xx = j - 1.6 * sigma; xx <= j + 1.6 * sigma; ++xx)
+        {
+          for (int yy = i - 1.6 * sigma; yy <= i + 1.6 * sigma; ++yy)
+          {
+            double mm = compute_m(img, xx, yy);
+            hist[(int)(((compute_g(img, xx, yy) + 3.1416) * 57.3) / 10)] += mm;
+          }
+        }
+        
+        int maxi = 0;
+        double maxg = hist[0];
+        for (int ig = 1; ig < 36; ++ig)
+        {
+          if (hist[ig] > maxg)
+          {
+            maxi = ig;
+            maxg = hist[ig];
+          }
+        }
+          
+        Points* p = malloc(sizeof(Points));
         p->x = j;
         p->y = i;
-
+        p->g = maxi * 10;
         SLIST_INSERT_HEAD(&head, p, next);
-
-        //struct color c = {.a = 0, .r = 255, .g=0, .b=0};
-        //put_pixel(img, j, i, to_int(c));
-        draw_circle(img, compute_m(img, j, i) / 10, j, i);
         ++nb_dots;
-      }
-      else if (me < p1 && me < p2 && me < p3 && me < p4 && me < p5 && me < p6 && me < p7 && me < p8
-          && remove_edges(img, j, i))
 
-      {
-        Points* p = malloc(sizeof(p));
-        p->x = j;
-        p->y = i;
-
-        SLIST_INSERT_HEAD(&head, p, next);
-
-        //struct color c = {.a = 0, .r = 0, .g=255, .b=0};
-        //put_pixel(img, j, i, to_int(c));
-        draw_circle(img, compute_m(img, j, i) / 10, j, i);
-        ++nb_dots;
+        double p80 = 0.8 * maxg;
+        p80 = p80;
+        for (int ig = 1; ig < 36; ++ig)
+        {
+          /*if (hist[ig] >= p80)
+          {
+            Points* p = malloc(sizeof(Points));
+            p->x = j;
+            p->y = i;
+            p->g = maxi * 10;
+            SLIST_INSERT_HEAD(&head, p, next);
+            ++nb_dots;
+          }*/
+        }
+        
+        draw_circle(img, 10, j, i);
       }
     }
   }
   printf("    points = %d\n", nb_dots);
+  return head;
 }
 
-void gradient_pyramide(SDL_Surface* img)
+struct slisthead gradient_pyramide(SDL_Surface* img)
 {
+  struct slisthead full_head;
+  SLIST_INIT(&full_head);
+
   grayscale(img);
   SDL_Surface*** octaves = malloc(5 * sizeof(SDL_Surface**));
   octaves = octaves;
@@ -151,7 +188,21 @@ void gradient_pyramide(SDL_Surface* img)
         int s = r * 2 + 1;
 
         octaves[i][j] = convolution(octaves[i][j], cov, s);
-        get_interest(octaves[i][j]);
+        struct slisthead head = get_interest(octaves[i][j], sigma);
+
+        Points* p = malloc(sizeof(Points));
+
+        SLIST_FOREACH(p, &head, next)
+        {
+          Points* np = malloc(sizeof(Points));
+          np->x = p->x;
+          np->y = p->y;
+          np->g = p->g;
+          np->sigma = sigma;
+
+          SLIST_INSERT_HEAD(&full_head, np, next);
+        }
+
         sigma *= sqrt(2);
 
         char buf[256];
@@ -161,4 +212,5 @@ void gradient_pyramide(SDL_Surface* img)
       }
     }
   }
+  return full_head;
 }
