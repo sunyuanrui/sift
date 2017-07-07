@@ -91,7 +91,6 @@ int is_interest(int j, int i, SDL_Surface* img)
             && remove_edges(img, j, i)) ||
           (me < p1 && me < p2 && me < p3 && me < p4 && me < p5 && me < p6 && me < p7 && me < p8
             && remove_edges(img, j, i)));
-
 }
 
 struct slisthead get_interest(SDL_Surface* img, double sigma)
@@ -115,10 +114,11 @@ struct slisthead get_interest(SDL_Surface* img, double sigma)
           for (int yy = i - 1.6 * sigma; yy <= i + 1.6 * sigma; ++yy)
           {
             double mm = compute_m(img, xx, yy);
-            hist[(int)(((compute_g(img, xx, yy) + 3.1416) * 57.3) / 10)] += mm;
+            double gauss = exp(-pow(j - xx, 2) - pow(i - yy, 2));
+            hist[(int)(((compute_g(img, xx, yy) + 3.1416) * 57.3) / 10)] += mm * gauss;
           }
         }
-        
+
         int maxi = 0;
         double maxg = hist[0];
         for (int ig = 1; ig < 36; ++ig)
@@ -129,7 +129,7 @@ struct slisthead get_interest(SDL_Surface* img, double sigma)
             maxg = hist[ig];
           }
         }
-          
+
         Points* p = malloc(sizeof(Points));
         p->x = j;
         p->y = i;
@@ -138,10 +138,9 @@ struct slisthead get_interest(SDL_Surface* img, double sigma)
         ++nb_dots;
 
         double p80 = 0.8 * maxg;
-        p80 = p80;
         for (int ig = 1; ig < 36; ++ig)
         {
-          if (hist[ig] >= p80)
+          if (hist[ig] >= p80 && ig != maxi)
           {
             Points* p = malloc(sizeof(Points));
             p->x = j;
