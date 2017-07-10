@@ -10,7 +10,7 @@
 
 int main(int argc, char* argv[])
 {
-  if (argc != 2)
+  if (argc != 3)
   {
     fprintf(stderr, "No image\n");
     exit(1);
@@ -23,6 +23,7 @@ int main(int argc, char* argv[])
   IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF);
 
   SDL_Surface* image = IMG_Load(argv[1]);
+  SDL_Surface* image1 = IMG_Load(argv[2]);
 
   if(!image) {
     printf("IMG_Load: %s\n", IMG_GetError());
@@ -52,7 +53,9 @@ int main(int argc, char* argv[])
   printf("Convolution: OK\n");
 
   grayscale(image);*/
-  gradient_pyramide(image);
+  struct slisthead l1 = gradient_pyramide(image);
+  struct slisthead l2 = gradient_pyramide(image1);
+  match(l1, l2);
 
   /*FILE* f = fopen("hist.csv", "w");
 
