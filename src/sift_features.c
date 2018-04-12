@@ -29,7 +29,7 @@ int remove_edges(SDL_Surface* img, int x, int y)
   int xy_1_1 = pix_to_color(get_pixel(img, x - 1, y - 1), img->format).r;
   int xy1_1 = pix_to_color(get_pixel(img, x + 1, y - 1), img->format).r;
   int xy_11 = pix_to_color(get_pixel(img, x - 1, y + 1), img->format).r;
-  int xy = pix_to_color(get_pixel(img, x - 1, y + 1), img->format).r;
+  int xy = pix_to_color(get_pixel(img, x, y), img->format).r;
 
   double dxx = x1 + x_1 - 2 * xy;
   double dyy = y1 + y_1 - 2 * xy;
